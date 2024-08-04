@@ -1,79 +1,24 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Introduction
+**Syenah** addresses these challenges by offering a single, intuitive app where users can seamlessly track and manage their digital assets. Our platform integrates with various **wallets** and **blockchains**, providing real-time analytics, advanced security features, and a customizable user experience. Additionally, users can perform **cross-chain swaps** directly within the app, enhancing not only portfolio analysis but also comprehensive asset management. 
 
-# Getting Started
+**Add Your Wallet Addresses**
+On this page, you can add multiple wallet addresses from various blockchain networks and digital wallets. This feature allows you to seamlessly integrate and track all your cryptocurrency and NFT holdings in one place, providing a unified and comprehensive view of your digital assets.
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+![Add wallet address.jpeg](https://cdn.dorahacks.io/static/files/190fa7226ea39ba002e81904800a4d02.jpeg)
 
-## Step 1: Start the Metro Server
+![crypto currency.jpeg](https://cdn.dorahacks.io/static/files/190fa72763ac7c0ad74e1ed4561a2354.jpeg)
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+**Cross-Chain Swap**
 
-To start Metro, run the following command from the _root_ of your React Native project:
+On this page, you can perform cross-chain swaps between multiple blockchains with ease. This feature enables you to exchange assets across different blockchain networks seamlessly, providing greater flexibility and control over your digital portfolio. Enjoy fast, secure, and efficient swaps directly within the app.
 
-```bash
-# using npm
-npm start
+![CrosschainSwap.jpeg](https://cdn.dorahacks.io/static/files/190fa7455459308c95cacd74862b6129.jpeg)
 
-# OR using Yarn
-yarn start
-```
+ **Home Page**
 
-## Step 2: Start your Application
+Last but not least, our Home Page serves as the central hub of the Syenah app. From here, you can easily navigate to various sections such as the Cross-Chain Swap page, your Dashboard, and more. Enjoy a seamless and intuitive experience as you manage and track your digital assets effortlessly.
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+![Home page app.jpeg](https://cdn.dorahacks.io/static/files/190fa772833aaf635a326f842aa9b34b.jpeg)
+**Future Enhancements**
 
-### For Android
-
-```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### For iOS
-
-```bash
-# using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
-
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
-
-## Step 3: Modifying your App
-
-Now that you have successfully run the app, let's modify it.
-
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
-
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+In the future, we have multiple plans to enhance Syenah by adding a range of advanced features. These will include yield farming tracking and interaction, on-chain gaming asset tracking, and the ability to move gaming assets across different blockchains. Our commitment is to continuously innovate and expand our offerings, ensuring Syenah remains a comprehensive and powerful tool for all your DeFi needs.
