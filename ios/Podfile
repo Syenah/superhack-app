@@ -1,0 +1,54 @@
+# Resolve react_native_pods.rb with node to allow for hoisting
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "react-native/scripts/react_native_pods.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
+
+platform :ios, min_ios_version_supported
+prepare_react_native_project!
+
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => linkage.to_sym
+end
+use_modular_headers!
+
+target 'Syenah' do
+  config = use_native_modules!
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    # An absolute path to your application root.
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+
+  target 'MyAppTests' do
+    inherit! :complete
+    # Pods for testing
+  end
+
+  post_install do |installer|
+    # Ensure this script runs correctly
+    begin
+      react_native_post_install(
+        installer,
+        config[:reactNativePath],
+        :mac_catalyst_enabled => false,
+        # :ccache_enabled => true
+      )
+    rescue => e
+      Pod::UI.warn("react_native_post_install hook failed: #{e.message}")
+    end
+
+    # Fix for the missing PrivacyInfo.xcprivacy issue
+    privacy_info_path = "#{Pod::Config.instance.installation_root}/Syenah/PrivacyInfo.xcprivacy"
+    if File.exist?(privacy_info_path)
+      Pod::UI.puts("PrivacyInfo.xcprivacy file exists at #{privacy_info_path}")
+    else
+      Pod::UI.warn("PrivacyInfo.xcprivacy file does not exist at #{privacy_info_path}. Creating a placeholder.")
+      File.write(privacy_info_path, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n</dict>\n</plist>")
+    end
+  end
+end

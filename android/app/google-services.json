@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "173644317250",
+    "project_id": "syenah",
+    "storage_bucket": "syenah.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:173644317250:android:2f2714a1cd9c7eb10aa3db",
+        "android_client_info": {
+          "package_name": "com.syenah"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3oGxGiTpwcizqr55o592T30oDhPoSuhY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
