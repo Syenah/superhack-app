@@ -1,5 +1,5 @@
-import { View, Text, FlatList, StyleSheet, Modal, TextInput, TouchableOpacity, Button } from 'react-native';
 import React, { useState, useCallback, useMemo, useRef } from 'react';
+import { View, Text, FlatList, StyleSheet, Modal, TextInput, TouchableOpacity, Button } from 'react-native';
 import Metamask from '../assets/svg/Metamask.svg';
 import TrustWallet from '../assets/svg/Trustwallet.svg';
 import PhantomWallet from '../assets/svg/Phantom.svg';
@@ -7,6 +7,10 @@ import LedgerLive from '../assets/svg/LeadgerLive.svg';
 import Plus from '../assets/svg/PlusIcon.svg';
 import CoinbaseWallet from '../assets/svg/CoinbaseWallet.svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch } from 'react-redux';
+import { addAddress } from '../redux/walletSlice';
+import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import RNHapticFeedback from 'react-native-haptic-feedback';
 
 const wallets = [
   { 
@@ -42,8 +46,15 @@ const wallets = [
 ];
 
 const WalletList = () => {
+  const dispatch = useDispatch();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [address, setAddress] = useState('');
   const [selectedWallet, setSelectedWallet] = useState(null);
-  
+  const snapPoints = useMemo(() => ['40%'], []);
+  const bottomSheetRef = useRef(null); 
+  // For the @gorhom/bottom-sheet library, we need to render the backdrop component
+  const renderBackdrop = useCallback((props:any) => (<BottomSheetBackdrop appearsOnIndex={0} disappearsOnIndex={-1} {...props} enableTouchThrough={true} />), []);
+
   const renderItem = ({ item }) => (
     <View style={styles.walletItem}>
       {getIconComponent(item.icon)}
@@ -57,6 +68,7 @@ const WalletList = () => {
         height={24}
         onPress={() => {
           setSelectedWallet(item);
+          setModalVisible(true);
         }}
       />
     </View>
@@ -79,6 +91,23 @@ const WalletList = () => {
     }
   };
 
+  const handleAddAddress = () => {
+    if (selectedWallet && address) {
+      const walletType = selectedWallet.name.toLowerCase();
+      const newAddress = { address, id: `${address}` };
+      dispatch(addAddress({ walletType, address: newAddress }));
+      
+      // Clear the address input
+      setAddress('');
+
+      // Close the bottom sheet
+      setModalVisible(false);
+    }
+  };
+
+  const handleSheetChanges = useCallback((index) => {
+    setModalVisible(index !== -1);
+  }, []);
   const options = {
     enableVibrateFallback: true,
     ignoreAndroidSystemSettings: false,
@@ -86,7 +115,38 @@ const WalletList = () => {
 
   return (
     <SafeAreaView style={{ backgroundColor: 'black', flex: 1 }}>
+      {/* <TopBar /> */}
       <FlatList data={wallets} renderItem={renderItem} keyExtractor={(item) => item.id} style={{marginTop: 20}} />
+      <BottomSheet
+        index={modalVisible ? 0 : -1}
+        onChange={handleSheetChanges}
+        backgroundStyle={{ backgroundColor: '#0f151a' }}
+        handleIndicatorStyle={{ backgroundColor: '#fafafa' }}
+        enablePanDownToClose
+        snapPoints={snapPoints}
+        enableContentPanningGesture={false}
+        ref={bottomSheetRef}
+        backdropComponent={renderBackdrop}
+      >
+        <View>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Add address for {selectedWallet?.name}</Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={setAddress}
+              value={address}
+              placeholder="Enter address"
+              placeholderTextColor="rgba(148, 173, 199, 0.5)"
+            />
+            <TouchableOpacity style={styles.addButton}   onPress={() => {
+    RNHapticFeedback.trigger('impactLight', options);
+    handleAddAddress();
+  }}>
+              <Text style={styles.addButtonText}>Add address</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </BottomSheet>
     </SafeAreaView>
   );
 };
@@ -116,6 +176,23 @@ const styles = StyleSheet.create({
   plusIcon: {
     marginLeft: 10,
   },
+  modalText: {
+    color: 'white',
+    fontSize: 16,
+    marginBottom: 20,
+    fontFamily: 'Poppins',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  modalView: {
+    backgroundColor: "#0f151a",
+    padding: 20,
+    alignItems: "center",
+    height: '100%',
+  },
   input: {
     height: 40,
     width: '100%',
@@ -125,6 +202,21 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 20,
     padding: 10,
+  },
+  addButton: {
+    backgroundColor: '#5856d6',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    width: '100%',
+    marginTop: 50,
+  },
+  addButtonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontFamily: 'Poppins',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
 
