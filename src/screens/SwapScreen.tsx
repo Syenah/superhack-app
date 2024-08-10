@@ -9,6 +9,7 @@ import {
   Clipboard,
 } from 'react-native';
 import React, {useState,useMemo,useRef,useEffect,useCallback} from 'react';
+import BottomSheet, {BottomSheetBackdrop} from '@gorhom/bottom-sheet';
 import SwapLine from '../assets/svg/swapline.svg';
 import Ethereum from '../assets/svg/network logo/EthereumMainnet.svg';
 import WalletIcon from '../assets/svg/walleticon.svg';
@@ -30,6 +31,7 @@ import Swapfail from '../assets/swapfail.json';
 import Copy from '../assets/svg/copy.svg';
 import SwapLoading from '../assets/swaploading.json';
 import axios from 'axios';
+import bottomSheet from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheet';
 
 
 const testBlockchain = [
@@ -115,6 +117,7 @@ const testTokens = [
 
 export default function SwapScreen() {
   const [amount, setAmount] = useState('0.000001');
+  const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [destinationChainSelector, setDestinationChainSelector] = useState('16281711391670634445');
   const [receiver, setReceiver] = useState('0x....');
   const [token, setToken] = useState('0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05');
@@ -129,6 +132,12 @@ export default function SwapScreen() {
   const [selectedBlockchainLogo, setSelectedBlockchainLogo] = useState(<Matic height={28} width={28}/>);
   const snapPoints = useMemo(() => ['40%'], []);
   const snapPointsSuccess = useMemo(() => ['60%'], []);
+  const bottomSheetPutAddressRef = useRef(null); 
+  const bottomSheetBlockchainRef = useRef(null);
+  const bottomSheetTokenRef = useRef(null);
+  const bottomSheetSuccessRef = useRef(null);
+  // For the @gorhom/bottom-sheet library, we need to render the backdrop component
+  const renderBackdrop = useCallback((props:any) => (<BottomSheetBackdrop appearsOnIndex={0} disappearsOnIndex={-1} {...props} enableTouchThrough={true} />), []);
 
   const handleNumberPress = num => {
     setAmount(prevAmount => prevAmount + num);
@@ -138,12 +147,17 @@ export default function SwapScreen() {
     setAmount(prevAmount => prevAmount.slice(0, -1));
   };
 
+  const openBottomSheet = () => {
+    setBottomSheetVisible(true);
+  };
+
   const handleAddAddress = () => {
     if (localInputValue.length > 0){
       setReceiver(localInputValue);
     }
     
     setLocalInputValue('');
+    bottomSheetPutAddressRef.current?.close();
   };
 
   const renderItemBlockchain = ({ item }) => (
@@ -151,6 +165,7 @@ export default function SwapScreen() {
       setSelectedBlockchain(item.name);
       setDestinationChainSelector(item.destinationChainSelector);
       setSelectedBlockchainLogo(item.logo);
+      bottomSheetBlockchainRef.current?.close();
     }}>
       <View style={styles.networkItemContainer}>
         {item?.logo}
@@ -161,6 +176,7 @@ export default function SwapScreen() {
   const swapTokenPayNative = async () => {
     
     setLoader(true);
+    bottomSheetSuccessRef.current?.expand();
     const body = {
       destinationChainSelector: destinationChainSelector.trim(),
       receiver: receiver.trim(),
@@ -181,16 +197,20 @@ export default function SwapScreen() {
       if (response?.status === 201) {
         console.log(response?.data);
         setTransaction(response?.data);
+        bottomSheetSuccessRef.current?.expand();
         setLoader(false);
       } else {
         console.log('Failed');
         setLoader(false);
         setSwapFail(true);
+
+        bottomSheetSuccessRef.current?.expand();
         
         
       }
     } catch (error) {
       console.log(error);
+      bottomSheetSuccessRef.current?.expand();
       setSwapFail(true);
       setLoader(false);
     }
@@ -218,6 +238,82 @@ export default function SwapScreen() {
             <Text style={styles.dollarValue}>$0</Text>
           </View>
           <View style={{flexDirection: 'column'}}>
+          <TouchableOpacity
+            onPress={openBottomSheet}
+            style={styles.tokenSelector}>
+            <View style={{flexDirection: 'column'}}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <Ethereum />
+                <View
+                  style={{
+                    flexDirection: 'column',
+                    marginLeft: 10,
+                    alignItems: 'flex-start',
+                    justifyContent: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 400,
+                      color: 'rgba(193, 199, 203, 1)',
+                    }}>
+                    {deployedBlockchain}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 400,
+                      color: 'rgba(127, 133, 141, 1)',
+                    }}>
+                    Blockchain
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress= {() => bottomSheetTokenRef.current?.expand()}
+            style={styles.tokenSelector}>
+            <View style={{flexDirection: 'column'}}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <CCIP height={28} width={28}/>
+                <View
+                  style={{
+                    flexDirection: 'column',
+                    marginLeft: 10,
+                    alignItems: 'flex-start',
+                    justifyContent: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 400,
+                      color: 'rgba(193, 199, 203, 1)',
+                    }}>
+                    {selectedToken}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 400,
+                      color: 'rgba(127, 133, 141, 1)',
+                    }}>
+                    Token
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
           </View>
         </View>
         <SwapLine width={310} />
@@ -237,6 +333,44 @@ export default function SwapScreen() {
             <Text style={styles.dollarValue}>$0</Text>
           </View>
           <View style={{flexDirection: 'column',alignItems:'flex-start'}}>
+          <TouchableOpacity
+            onPress= {() => bottomSheetBlockchainRef.current?.expand()}
+            style={styles.tokenSelector}>
+            <View style={{flexDirection: 'column'}}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                {selectedBlockchainLogo}
+                <View
+                  style={{
+                    flexDirection: 'column',
+                    marginLeft: 10,
+                    alignItems: 'flex-start',
+                    justifyContent: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 400,
+                      color: 'rgba(193, 199, 203, 1)',
+                    }}>
+                    {selectedBlockchain}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 400,
+                      color: 'rgba(127, 133, 141, 1)',
+                    }}>
+                    Blockchain
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
               <View
                 style={{
                   flexDirection: 'row',
@@ -251,6 +385,16 @@ export default function SwapScreen() {
                     alignItems: 'flex-start',
                     justifyContent: 'center',
                   }}>
+                    <TouchableOpacity onPress={() => bottomSheetPutAddressRef.current?.expand()}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 400,
+                      color: 'rgba(193, 199, 203, 1)',
+                    }}>
+                    {`${receiver.substring(0, 4)}...${receiver.substring(receiver.length - 3)}`}
+                  </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
           
@@ -283,6 +427,138 @@ export default function SwapScreen() {
       <TouchableOpacity style={styles.previewButton} onPress={swapTokenPayNative}>
         <Text style={styles.previewText}>Swap</Text>
       </TouchableOpacity>
+
+      <BottomSheet
+        index={-1}
+        backgroundStyle={{ backgroundColor: '#0f151a' }}
+        handleIndicatorStyle={{ backgroundColor: '#fafafa' }}
+        enablePanDownToClose
+        snapPoints={snapPoints}
+        enableContentPanningGesture={false}
+        ref={bottomSheetPutAddressRef}
+        backdropComponent={renderBackdrop}
+      >
+          <View style={styles.modalView}>
+            <TextInput
+              style={styles.input}
+              onChangeText={setLocalInputValue}
+              value={localInputValue}
+              placeholder="Enter address"
+              placeholderTextColor="rgba(148, 173, 199, 0.5)"
+            />
+            <TouchableOpacity  style={styles.addButton}  onPress={() => {
+    handleAddAddress();
+  }}>
+              <Text style={styles.addButtonText}>Add address</Text>
+            </TouchableOpacity>
+          </View>
+      </BottomSheet>
+      <BottomSheet
+        index={-1}
+        backgroundStyle={{ backgroundColor: '#0f151a' }}
+        handleIndicatorStyle={{ backgroundColor: '#fafafa' }}
+        enablePanDownToClose
+        snapPoints={snapPoints}
+        enableContentPanningGesture={false}
+        ref={bottomSheetBlockchainRef}
+        backdropComponent={renderBackdrop}
+      >
+  <FlatList
+    data={testBlockchain}
+    renderItem={renderItemBlockchain}
+    keyExtractor={(item, index) => index.toString()}
+    numColumns={3}
+    showsVerticalScrollIndicator={true}
+    contentContainerStyle={{
+      justifyContent: 'center',
+      alignItems: 'center',
+      alignSelf: 'center',
+    }}
+  />
+      </BottomSheet>
+      <BottomSheet
+        index={-1}
+        backgroundStyle={{ backgroundColor: '#0f151a' }}
+        handleIndicatorStyle={{ backgroundColor: '#fafafa' }}
+        enablePanDownToClose
+        snapPoints={snapPoints}
+        enableContentPanningGesture={false}
+        ref={bottomSheetTokenRef}
+        backdropComponent={renderBackdrop}
+      >
+      <FlatList data={testTokens} renderItem={({ item }) => (
+        <TouchableOpacity style={styles.networkItem} onPress={() => {
+          setToken(item.tokenAddress);
+          setSelectedToken(item.name);
+          bottomSheetTokenRef.current?.close();
+        }}>
+          <View style={styles.networkItemContainer}>
+            {item?.logo}
+            <Text style={styles.networkName}>{item.name}</Text>
+          </View>
+        </TouchableOpacity>
+      )} keyExtractor={(item, index) => index.toString()} />
+
+      </BottomSheet>
+      <BottomSheet
+        index={-1}
+        backgroundStyle={{ backgroundColor: '#0f151a' }}
+        handleIndicatorStyle={{ backgroundColor: '#fafafa' }}
+        enablePanDownToClose
+        snapPoints={snapPointsSuccess}
+        enableContentPanningGesture={false}
+        ref={bottomSheetSuccessRef}
+        backdropComponent={renderBackdrop}
+      >
+          {loader ? 
+          <View style={{justifyContent:'center',alignItems:'center'}}>
+          <LottieView 
+            source={SwapLoading}
+            autoPlay
+            loop
+            style={{ width: 200, height: 200 }}
+          /> 
+          <Text style={{fontSize: 24,color: "#fff",fontWeight: 600 , marginTop: 20}}>Transferring</Text>
+          </View>
+          :
+           swapFail ? 
+          <View style={{justifyContent:'center',alignItems:'center'}}>
+            <LottieView
+            source={Swapfail}
+            autoPlay
+            loop={false}
+            style={{ width: 200, height: 200 }}
+          />
+          <View style={{justifyContent: 'center',alignItems:'center',flexDirection:'column'}}><Text style={{fontSize: 24,color: "#fff",fontWeight: 600,marginTop: 10}}>Transfer Failed</Text>
+          <TouchableOpacity style={styles.previewSucessButton} onPress={() => bottomSheetSuccessRef.current?.close()}>
+            <Text style={styles.previewText}>Close</Text>
+          </TouchableOpacity>
+          </View>
+          </View> :
+          <>
+          <View style={{justifyContent:'center',alignItems:'center'}}>
+            <LottieView
+              source={Sucess}
+              autoPlay
+              loop={false}
+              style={{ width: 200, height: 150 }}
+            />
+            <Text style={{fontSize: 18,color: "#fff",fontWeight: 400}}>Transfer Successful</Text>
+            <Text style={{fontSize: 28,color: "#fff",fontWeight: 600,marginTop: 12}}>{amount}{" "}{selectedToken}</Text>
+            
+          </View>
+          <View style={{marginHorizontal: 20,marginTop: 40}}>
+          <Text style={{fontSize: 14,color: "grey",fontWeight: 400}}>{`You can check the transaction here (CCIP Explorer)`}</Text>
+          <View style={{flexDirection: "row",justifyContent:'center',alignItems:'center',marginHorizontal:20}}>
+            <Text style={{fontSize: 12,color: "#fff",fontWeight: 400,marginTop: 10,width: 300,marginEnd:22}}>{transaction}</Text>
+          <Copy height={28} width={28}  onPress={() => Clipboard.setString(transaction)} />
+            </View>
+          <TouchableOpacity style={styles.previewSucessButton} onPress={() => bottomSheetSuccessRef.current?.close()}>
+            <Text style={styles.previewText}>Close</Text>
+          </TouchableOpacity>
+          </View>
+          </>}
+      </BottomSheet>
     </SafeAreaView>
   );
 }
