@@ -32,6 +32,7 @@ import Copy from '../assets/svg/copy.svg';
 import SwapLoading from '../assets/swaploading.json';
 import axios from 'axios';
 import bottomSheet from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheet';
+import { BASE_URL } from '../../URL';
 
 
 const testBlockchain = [
@@ -183,10 +184,9 @@ export default function SwapScreen() {
       token: token.trim(),
       amount: amount,
     };
-    console.log("bodyyyyyyyyyy", body);
     try {
       const response = await axios.post(
-        `http://13.127.84.244/ccip/transfer-native`,
+        `${BASE_URL}/ccip/transfer-native`,
         body,
         {
           headers: {
@@ -195,12 +195,12 @@ export default function SwapScreen() {
         }
       );
       if (response?.status === 201) {
-        console.log(response?.data);
+         (response?.data);
         setTransaction(response?.data);
         bottomSheetSuccessRef.current?.expand();
         setLoader(false);
       } else {
-        console.log('Failed');
+         ('Failed');
         setLoader(false);
         setSwapFail(true);
 
@@ -209,7 +209,7 @@ export default function SwapScreen() {
         
       }
     } catch (error) {
-      console.log(error);
+       (error);
       bottomSheetSuccessRef.current?.expand();
       setSwapFail(true);
       setLoader(false);

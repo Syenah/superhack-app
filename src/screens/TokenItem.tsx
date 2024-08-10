@@ -39,6 +39,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Copy from '../assets/svg/copy.svg';
 import RNHapticFeedback from 'react-native-haptic-feedback';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { BASE_URL } from '../../URL';
 
 const logoComponents = {
   Arbitrum: <Arbitrum height={28} width={28} />,
@@ -201,9 +202,9 @@ const calculateTotalValue = (data) => {
       try {
         const jsonValue = JSON.stringify(selectedNetwork);
         await AsyncStorage.setItem('selectedNetwork', jsonValue);
-        console.log('selected network', selectedNetwork);
+         ('selected network', selectedNetwork);
       } catch (e) {
-        console.log('error', e);
+         ('error', e);
       }
     }
   };
@@ -225,13 +226,13 @@ const calculateTotalValue = (data) => {
   }, []);
   const fetchTokenData = async () => {
     let dataToken;
-    console.log('selectedNetwork====================>>>>>>>>>>>>>>>>>>>>', selectedNetwork)
+     ('selectedNetwork====================>>>>>>>>>>>>>>>>>>>>', selectedNetwork)
 
     if (walletType === 'metamask' || walletType === 'trust wallet' || walletType === 'coinbase wallet') {
       if (address) {
         try {
           const response = await axios.get(
-            `https://syenah.live/moralis/ethereumTokenBalances?chain=${selectedNetwork?.chainId}&address=${address}`,
+            `${BASE_URL}/moralis/ethereumTokenBalances?chain=${selectedNetwork?.chainId}&address=${address}`,
           );
           dataToken = response.data;
           if(response?.status === 200){
@@ -245,7 +246,7 @@ const calculateTotalValue = (data) => {
           );
         }
       } else {
-        console.log('No address found for MetaMask or Trust Wallet');
+         ('No address found for MetaMask or Trust Wallet');
         setTokenData([]); // Set an empty array to clear the token data
         return;
       }
@@ -256,7 +257,7 @@ const calculateTotalValue = (data) => {
             `https://api.shyft.to/sol/v1/wallet/all_tokens?network=mainnet-beta&wallet=${address}`,
             {
               headers: {
-                'x-api-key': 'XqmUTTWgQQYc9wL0',
+                'x-api-key': process.env.SOLANA_API_KEY,
               },
             },
           );
@@ -265,12 +266,12 @@ const calculateTotalValue = (data) => {
             setLoading(false);
           }
           setSolana(true);
-          console.log('solana data', response);
+           ('solana data', response);
         } catch (error) {
           console.error('Error fetching data for Phantom Wallet:', error);
         }
       } else {
-        console.log('No address found for Phantom Wallet');
+         ('No address found for Phantom Wallet');
         setTokenData([]); // Set an empty array to clear the token data
         return;
       }
@@ -298,7 +299,7 @@ const calculateTotalValue = (data) => {
         setSelectedNetwork(initialNetwork);
       }
     } catch (e) {
-      console.log('error', e);
+       ('error', e);
     }
   
     fetchTokenData().then(() => setRefreshing(false));
@@ -335,7 +336,7 @@ const calculateTotalValue = (data) => {
     const fetchNetwork = async () => {
       try {
         const jsonValue = await AsyncStorage.getItem('selectedNetwork');
-        console.log('jsonValue', jsonValue);
+         ('jsonValue', jsonValue);
         if (jsonValue !== null) {
           const networkData = JSON.parse(jsonValue);
           const updatedNetwork = {
@@ -350,7 +351,7 @@ const calculateTotalValue = (data) => {
           setSelectedNetwork(initialNetwork);
         }
       } catch (e) {
-        console.log('error', e);
+         ('error', e);
       }
     };
   
