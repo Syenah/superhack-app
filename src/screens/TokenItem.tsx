@@ -14,6 +14,8 @@ import React, {useEffect, useState, useRef, useMemo, useCallback} from 'react';
 import axios from 'axios';
 import {useRoute} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {useSelector} from 'react-redux';
+import LinearGradient from 'react-native-linear-gradient';
 import Arbitrum from '../assets/svg/network logo/Arbitrum.svg';
 import Avalanche from '../assets/svg/network logo/Avalanche.svg';
 import Binance from '../assets/svg/network logo/BNBMainnet.svg';
@@ -31,6 +33,8 @@ import Moonbeam from '../assets/svg/network logo/Moonbeam.svg';
 import Palm from '../assets/svg/network logo/Palm.svg';
 import ArrowDown from '../assets/svg/ArrowDown.svg';
 import SolanaNetwork from '../assets/svg/network logo/Solana.svg';
+import BottomSheet, { BottomSheetBackdrop }  from '@gorhom/bottom-sheet';
+import SearchIcon from '../assets/svg/SearchIcon.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Copy from '../assets/svg/copy.svg';
 import RNHapticFeedback from 'react-native-haptic-feedback';
@@ -159,6 +163,10 @@ const TokenItem = () => {
   const [solana, setSolana] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState(null);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+  const bottomSheetRef = useRef(null);
+  const snapPoints = useMemo(() => ['50%'], []);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredNetworks, setFilteredNetworks] = useState(network[0].networks);
   const [loading, setLoading] = useState(true);
 
 // Function to randomly select a light color
@@ -169,6 +177,38 @@ const TokenItem = () => {
   const toggleBottomSheet = () => {
     setIsBottomSheetVisible(!isBottomSheetVisible);
   };
+  const renderBackdrop = useCallback((props:any) => (<BottomSheetBackdrop appearsOnIndex={0} disappearsOnIndex={-1} {...props} enableTouchThrough={true} />), []);
+
+  const handleNetworkSelect = async (selectedNetwork) => {
+    if (selectedNetwork === null) {
+      setSelectedNetwork(initialNetwork);
+    } else {
+      setSelectedNetwork(selectedNetwork);
+      try {
+        const jsonValue = JSON.stringify(selectedNetwork);
+        await AsyncStorage.setItem('selectedNetwork', jsonValue);
+        console.log('selected network', selectedNetwork);
+      } catch (e) {
+        console.log('error', e);
+      }
+    }
+  };
+  const renderNetworkItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.networkItem}
+      onPress={() =>{    RNHapticFeedback.trigger('impactLight', options); handleNetworkSelect(item)}}
+    >
+      <View style={styles.networkItemContainer}>
+        {logoComponents[item.logoName]}
+        <Text style={styles.networkName}>{item.name}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+  const handleSheetChanges = useCallback(index => {
+    if (index === -1) {
+      setIsBottomSheetVisible(false);
+    }
+  }, []);
   const fetchTokenData = async () => {
     let dataToken;
     console.log('selectedNetwork====================>>>>>>>>>>>>>>>>>>>>', selectedNetwork)
@@ -202,7 +242,7 @@ const TokenItem = () => {
             `https://api.shyft.to/sol/v1/wallet/all_tokens?network=mainnet-beta&wallet=${address}`,
             {
               headers: {
-                'x-api-key': process.env.API_KEY,
+                'x-api-key': 'XqmUTTWgQQYc9wL0',
               },
             },
           );
@@ -249,6 +289,17 @@ const TokenItem = () => {
     fetchTokenData().then(() => setRefreshing(false));
   }, []);
 
+  const handleSearch = query => {
+    setSearchQuery(query);
+    if (query) {
+      const filtered = network[0].networks.filter(item =>
+        item.name.toLowerCase().includes(query.toLowerCase()),
+      );
+      setFilteredNetworks(filtered);
+    } else {
+      setFilteredNetworks(network[0].networks);
+    }
+  };
   const options = {
     enableVibrateFallback: true,
     ignoreAndroidSystemSettings: false,
@@ -466,6 +517,51 @@ const TokenItem = () => {
           </View>
         )}
       />}
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={isBottomSheetVisible ? 0 : -1}
+        snapPoints={snapPoints}
+        onChange={handleSheetChanges}
+        enablePanDownToClose
+        enableContentPanningGesture={false}
+        handleIndicatorStyle={{backgroundColor: '#fafafa'}}
+        backdropComponent={renderBackdrop}
+        backgroundStyle={{
+          backgroundColor: '#0f151a',
+          height: '100%',
+          width: '100%',
+          justifyContent: 'center',
+          alignItems: 'center',
+
+        }}>
+        <SafeAreaView style={{backgroundColor: '#0f151a', marginTop: 10}}>
+          <View style={styles.containerTopbar}>
+            <View style={styles.searchBar}>
+              <SearchIcon width={24} height={24} />
+              <TextInput
+                placeholder="Search"
+                style={styles.input}
+                placeholderTextColor="#94ADC7"
+                onChangeText={handleSearch}
+                value={searchQuery}
+              />
+            </View>
+          </View>
+        </SafeAreaView>
+
+        <FlatList
+          data={filteredNetworks}
+          renderItem={renderNetworkItem}
+          numColumns={3}
+          keyExtractor={item => `${item.name}-${item.chainId}`} // Generate a unique key for each item
+          showsVerticalScrollIndicator={true}
+          contentContainerStyle={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            alignSelf: 'center',
+          }}
+        />
+      </BottomSheet>
     </SafeAreaView>
   );
 };
@@ -566,7 +662,31 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontFamily: 'Poppins',
   },
-
+  containerTopbar: {
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    height: 72,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#243647',
+    borderRadius: 12,
+    flex: 1,
+    paddingLeft: 10,
+    height: 48,
+  },
+  input: {
+    marginLeft: 10,
+    flex: 1,
+    color: 'white',
+  },
+  iconGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+  },
 });
 
 export default TokenItem;
