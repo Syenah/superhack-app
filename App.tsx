@@ -16,12 +16,6 @@ export default function App() {
       const enabled =
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-      if (enabled) {
-        console.log('Authorization status:', authStatus);
-      } else {
-        console.log('User did not grant permission');
-      }
     } catch (error) {
       console.error('Failed to request user permission:', error);
     }
@@ -30,7 +24,6 @@ export default function App() {
   const getToken = async () => {
     try {
       const token = await messaging().getToken();
-      console.log('Token:=====================>>>>>>>>?????', token);
     } catch (error) {
       console.error('Failed to get FCM token:', error);
     }
