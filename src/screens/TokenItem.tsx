@@ -168,12 +168,26 @@ const TokenItem = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredNetworks, setFilteredNetworks] = useState(network[0].networks);
   const [loading, setLoading] = useState(true);
+  const [totalUsdValue, setTotalUsdValue] = useState(0);
+  const [tokenCount, setTokenCount] = useState(0);
 
 // Function to randomly select a light color
 // const getRandomLightColor = () => {
 //   const randomIndex = Math.floor(Math.random() * lightColors.length);
 //   return lightColors[randomIndex];
 // };
+const calculateTotalValue = (data) => {
+  let total = 0;
+  let count = 0;
+  data.forEach(item => {
+    if (item.usd_value) {
+      total += parseFloat(item.usd_value);
+    }
+    count++;
+  });
+  setTotalUsdValue(total);
+  setTokenCount(count);
+};
   const toggleBottomSheet = () => {
     setIsBottomSheetVisible(!isBottomSheetVisible);
   };
@@ -263,6 +277,7 @@ const TokenItem = () => {
     }
 
     setTokenData(dataToken);
+    calculateTotalValue(dataToken);
   };
 
   const onRefresh = React.useCallback(async () => {
@@ -442,6 +457,14 @@ const TokenItem = () => {
           </View>
           <Copy height={28} width={28}  onPress={() => Clipboard.setString(address)} />
         </View>
+      </View>
+      <View style={styles.summaryContainer}>
+        <Text style={styles.summaryText}>
+          Total Value: ${totalUsdValue?.toFixed(2)}
+        </Text>
+        <Text style={styles.summaryText}>
+          Total Tokens: {tokenCount}
+        </Text>
       </View>
 
      { loading ? <FlatList
@@ -686,6 +709,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: 10,
+  },
+  summaryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#121A21',
+    marginHorizontal: 20,
+    marginTop: 20,
+    borderRadius: 10,
+  },
+  summaryText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Poppins',
+    fontWeight: 'bold',
   },
 });
 
